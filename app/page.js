@@ -192,14 +192,14 @@ export default function Home() {
             <label className="mb-1 block text-sm text-neutral-400">Lore language</label>
             <div className="flex gap-2">
               {[
-                { code: "en", label: "English" },
-                { code: "pt", label: "Português (PT)" },
+                { code: "en", label: "ENG" },
+                { code: "pt", label: "PT" },
               ].map((l) => (
                 <button
                   type="button"
                   key={l.code}
                   onClick={() => setLanguage(l.code)}
-                  className={`flex-1 rounded-lg border px-3 py-2 text-sm ${
+                  className={`flex-1 rounded-lg border px-2 py-1.5 text-xs ${
                     language === l.code
                       ? "border-amber-500 bg-amber-500/20 text-amber-300"
                       : "border-neutral-700 bg-neutral-950 text-neutral-400"
