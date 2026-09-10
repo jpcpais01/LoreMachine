@@ -43,7 +43,7 @@ export default function CatalogPageCard({ character, onDelete }) {
         character={character}
         scale={scale}
         buttons={
-          <div className="no-print absolute right-3 top-3 flex gap-2">
+          <div className="no-print png-hide absolute right-3 top-3 flex gap-2">
             <button
               onClick={handleSavePng}
               disabled={saving}
