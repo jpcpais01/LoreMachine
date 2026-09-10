@@ -2,21 +2,13 @@ import { NextResponse } from "next/server";
 import { callChat, generateImage } from "@/lib/openrouter";
 import { buildSystemPrompt } from "@/lib/lore";
 import { buildImagePrompt } from "@/lib/artStyle";
+import { parseLlmJson } from "@/lib/parseLlmJson";
 
 export const maxDuration = 120;
 
-function parseLlmJson(raw) {
-  const cleaned = raw
-    .trim()
-    .replace(/^```(?:json)?/i, "")
-    .replace(/```$/, "")
-    .trim();
-  return JSON.parse(cleaned);
-}
-
 export async function POST(req) {
   try {
-    const { name, description, tier, count } = await req.json();
+    const { name, description, tier, count, language } = await req.json();
 
     if (!description || !description.trim()) {
       return NextResponse.json({ error: "A character description is required." }, { status: 400 });
@@ -24,11 +16,13 @@ export async function POST(req) {
 
     const safeTier = ["normal", "legend", "myth"].includes(tier) ? tier : "normal";
     const safeCount = Math.min(3, Math.max(1, Number(count) || 3));
+    const safeLanguage = language === "pt" ? "pt" : "en";
 
-    const system = buildSystemPrompt();
+    const system = buildSystemPrompt(safeLanguage);
     const user = [
       `Character name: ${name?.trim() || "(unnamed)"}`,
       `Tier: ${safeTier}`,
+      `Output language for subtitle/lore: ${safeLanguage === "pt" ? "European Portuguese" : "English"}`,
       `Number of image_prompts variations requested: ${safeCount}`,
       `User's character description:`,
       description.trim(),
