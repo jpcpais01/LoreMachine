@@ -6,8 +6,10 @@ import TierToggle from "@/components/TierToggle";
 import TierBadge from "@/components/TierBadge";
 import ImageGrid from "@/components/ImageGrid";
 import Highlighted from "@/components/Highlighted";
+import RelicsPage from "@/components/RelicsPage";
 import { addCharacter } from "@/lib/db";
 import { randomArchetype } from "@/lib/archetypes";
+import { exportPagePng } from "@/lib/exportPagePng";
 
 export default function Home() {
   const [name, setName] = useState("");
@@ -22,6 +24,11 @@ export default function Home() {
   const [saved, setSaved] = useState(false);
   const [nameLoading, setNameLoading] = useState(false);
   const [descLoading, setDescLoading] = useState(false);
+  const [savingPng, setSavingPng] = useState(false);
+
+  // Rendered offscreen so the result card can offer a one-click PNG export
+  // (same page layout as the catalog) without saving to the catalog first.
+  const hiddenPageRef = useRef(null);
 
   // A ref (not state) so two auto-generate clicks fired back-to-back both
   // see the same picked archetype instead of racing on an async state update.
@@ -127,6 +134,17 @@ export default function Home() {
       createdAt: Date.now(),
     });
     setSaved(true);
+  }
+
+  async function handleDownloadPagePng() {
+    if (!result || savingPng) return;
+    setSavingPng(true);
+    try {
+      const filename = `${(name || "relic").replace(/\s+/g, "-").toLowerCase()}-page.png`;
+      await exportPagePng(hiddenPageRef.current, filename);
+    } finally {
+      setSavingPng(false);
+    }
   }
 
   return (
@@ -301,12 +319,36 @@ export default function Home() {
             </p>
           </div>
 
-          <button
-            onClick={handleAddToCatalog}
-            className="mt-5 w-full rounded-lg border border-amber-500 px-4 py-2 text-amber-400 hover:bg-amber-500/10"
-          >
-            {saved ? "Added to catalog ✓" : "Add to catalog"}
-          </button>
+          <div className="mt-5 grid grid-cols-2 gap-3">
+            <button
+              onClick={handleAddToCatalog}
+              className="rounded-lg border border-amber-500 px-4 py-2 text-amber-400 hover:bg-amber-500/10"
+            >
+              {saved ? "Added to catalog ✓" : "Add to catalog"}
+            </button>
+            <button
+              onClick={handleDownloadPagePng}
+              disabled={savingPng}
+              className="rounded-lg border border-neutral-700 px-4 py-2 text-neutral-300 hover:border-amber-500 hover:text-amber-400 disabled:opacity-50"
+            >
+              {savingPng ? "Saving…" : "Download page PNG"}
+            </button>
+          </div>
+
+          {/* Offscreen — same page layout as the catalog, rendered purely so
+              the button above can export it without saving to the catalog first. */}
+          <div className="no-print pointer-events-none fixed left-[-9999px] top-0" aria-hidden="true">
+            <RelicsPage
+              ref={hiddenPageRef}
+              character={{
+                name: name || "(unnamed)",
+                subtitle: result.subtitle,
+                lore: result.lore,
+                tier: result.tier,
+                images: result.images,
+              }}
+            />
+          </div>
         </section>
       )}
     </main>
