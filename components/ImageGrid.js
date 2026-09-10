@@ -25,12 +25,14 @@ function ImageTile({ img, idx, onDownload, className }) {
 
 export default function ImageGrid({ images, onDownload, className = "", fillHeight = false }) {
   const n = images.length;
-  const tileClass = fillHeight ? "h-full" : "aspect-[3/4]";
+  // Less-tall than a portrait crop, used for the 2-image layout and (via the
+  // flex row's stretch behavior) to set the whole 3-image block's height.
+  const heroClass = fillHeight ? "h-full" : "aspect-[4/3]";
 
   if (n === 3) {
     return (
-      <div className={`flex gap-2 ${fillHeight ? "h-full" : "aspect-[3/2]"} ${className}`}>
-        <ImageTile img={images[0]} idx={0} onDownload={onDownload} className="flex-[1.6]" />
+      <div className={`flex gap-2 ${fillHeight ? "h-full" : ""} ${className}`}>
+        <ImageTile img={images[0]} idx={0} onDownload={onDownload} className={`flex-[1.5] ${heroClass}`} />
         <div className="flex flex-1 flex-col gap-2">
           <ImageTile img={images[1]} idx={1} onDownload={onDownload} className="flex-1" />
           <ImageTile img={images[2]} idx={2} onDownload={onDownload} className="flex-1" />
@@ -42,15 +44,15 @@ export default function ImageGrid({ images, onDownload, className = "", fillHeig
   if (n === 2) {
     return (
       <div className={`grid grid-cols-2 gap-2 ${fillHeight ? "h-full" : ""} ${className}`}>
-        <ImageTile img={images[0]} idx={0} onDownload={onDownload} className={tileClass} />
-        <ImageTile img={images[1]} idx={1} onDownload={onDownload} className={tileClass} />
+        <ImageTile img={images[0]} idx={0} onDownload={onDownload} className={heroClass} />
+        <ImageTile img={images[1]} idx={1} onDownload={onDownload} className={heroClass} />
       </div>
     );
   }
 
   return (
     <div className={`${fillHeight ? "h-full" : ""} ${className}`}>
-      <ImageTile img={images[0]} idx={0} onDownload={onDownload} className={tileClass} />
+      <ImageTile img={images[0]} idx={0} onDownload={onDownload} className={fillHeight ? "h-full" : "aspect-[3/4]"} />
     </div>
   );
 }
