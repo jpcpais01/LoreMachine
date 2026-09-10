@@ -159,8 +159,9 @@ export default function Home() {
             <button
               type="button"
               onClick={handleAutoDescription}
-              disabled={descLoading}
-              className="text-xs text-amber-400 underline underline-offset-2 disabled:opacity-50"
+              disabled={descLoading || !name.trim()}
+              title={!name.trim() ? "Enter or auto-generate a name first" : undefined}
+              className="text-xs text-amber-400 underline underline-offset-2 disabled:opacity-50 disabled:no-underline"
             >
               {descLoading
                 ? description.trim()
