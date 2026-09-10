@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import RelicsPage, { PAGE_W, PAGE_H } from "@/components/RelicsPage";
-import { exportPagePng } from "@/lib/exportPagePng";
+import { renderRelicsPagePng } from "@/lib/renderRelicsPagePng";
 
 function useResponsiveScale() {
   const [scale, setScale] = useState(1);
@@ -22,7 +22,6 @@ function useResponsiveScale() {
 
 export default function CatalogPageCard({ character, onDelete }) {
   const scale = useResponsiveScale();
-  const pageRef = useRef(null);
   const [saving, setSaving] = useState(false);
 
   async function handleSavePng() {
@@ -30,7 +29,7 @@ export default function CatalogPageCard({ character, onDelete }) {
     setSaving(true);
     try {
       const filename = `${(character.name || "relic").replace(/\s+/g, "-").toLowerCase()}-page.png`;
-      await exportPagePng(pageRef.current, filename);
+      await renderRelicsPagePng(character, filename);
     } finally {
       setSaving(false);
     }
@@ -39,11 +38,10 @@ export default function CatalogPageCard({ character, onDelete }) {
   return (
     <div className="catalog-page-wrapper mx-auto" style={{ width: PAGE_W * scale, height: PAGE_H * scale }}>
       <RelicsPage
-        ref={pageRef}
         character={character}
         scale={scale}
         buttons={
-          <div className="no-print png-hide absolute right-3 top-3 flex gap-2">
+          <div className="no-print absolute right-3 top-3 flex gap-2">
             <button
               onClick={handleSavePng}
               disabled={saving}

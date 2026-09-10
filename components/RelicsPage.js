@@ -1,41 +1,22 @@
-import { forwardRef } from "react";
 import TierBadge from "@/components/TierBadge";
 import ImageGrid from "@/components/ImageGrid";
 import Highlighted from "@/components/Highlighted";
+import { PAGE_W, PAGE_H, PADDING_PX, HEADER_HEIGHT, imageAreaTop, imageAreaHeight, loreTop, loreHeight } from "@/lib/pageLayout";
 
-// A4 at 96 CSS px/inch.
-export const PAGE_W = 793.7;
-export const PAGE_H = 1122.5;
-
-const PADDING_PX = 12 * (96 / 25.4); // "12mm"
-const HEADER_HEIGHT = 96; // fixed so the image area's position never depends on name/subtitle length
-const HEADER_GAP = 12;
-const HALF_MARGIN = 20; // keep the image area at least this far above the page's true midline
-const LORE_GAP = 16;
-
-// Everything below is measured relative to the padding box (i.e. the same
-// origin normal-flow children use), not the page's outer border box.
-const contentHeight = PAGE_H - PADDING_PX * 2;
-const pageMidline = PAGE_H / 2 - PADDING_PX;
-const imageAreaTop = HEADER_HEIGHT + HEADER_GAP;
-const imageAreaBottom = pageMidline - HALF_MARGIN;
-const imageAreaHeight = imageAreaBottom - imageAreaTop;
-const loreTop = imageAreaBottom + LORE_GAP;
-const loreHeight = contentHeight - loreTop;
+export { PAGE_W, PAGE_H };
 
 // The single-character compendium page: name/subtitle/tier header, then an
 // image area pinned to the page's upper half (ending HALF_MARGIN above the
 // true midline, independent of how tall the header or lore text are), then
-// lore filling the rest. Used both in the catalog list and (offscreen) for
-// a one-off PNG export straight from the generator's result — same layout
-// either way. `buttons` renders as a ".no-print"/".png-hide" overlay so
-// it's excluded from PNG exports and printed pages.
-const RelicsPage = forwardRef(function RelicsPage({ character, scale = 1, buttons = null }, ref) {
+// lore filling the rest. Used for the on-screen catalog list — PNG export
+// is rendered separately straight from the character data via
+// lib/renderRelicsPagePng.js, not by capturing this DOM. `buttons` renders
+// as a ".no-print" overlay so it's excluded from printed pages.
+export default function RelicsPage({ character, scale = 1, buttons = null }) {
   const { name, subtitle, tier, lore, images } = character;
 
   return (
     <div
-      ref={ref}
       className="catalog-page relative bg-white text-neutral-900 shadow-lg"
       style={{
         width: PAGE_W,
@@ -82,6 +63,4 @@ const RelicsPage = forwardRef(function RelicsPage({ character, scale = 1, button
       </div>
     </div>
   );
-});
-
-export default RelicsPage;
+}
