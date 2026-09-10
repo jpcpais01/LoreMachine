@@ -47,9 +47,12 @@ export async function POST(req) {
     }
 
     // Generate the first image alone, then use it as a visual reference for
-    // the rest so the character stays consistent across variations.
+    // the rest so the character stays consistent across variations. With 3
+    // variations the first is landscape (4:3) to act as the wide hero shot
+    // in the collage layout; the other slots stay portrait (3:4).
     const [firstPrompt, ...restPrompts] = imagePrompts;
-    const firstDataUrl = await generateImage(buildImagePrompt(firstPrompt, safeTier), { aspectRatio: "3:4" });
+    const firstAspectRatio = safeCount === 3 ? "4:3" : "3:4";
+    const firstDataUrl = await generateImage(buildImagePrompt(firstPrompt, safeTier), { aspectRatio: firstAspectRatio });
     const images = [{ prompt: firstPrompt, dataUrl: firstDataUrl }];
 
     if (restPrompts.length > 0) {
