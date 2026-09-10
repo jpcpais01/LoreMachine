@@ -5,17 +5,23 @@ import { parseLlmJson } from "@/lib/parseLlmJson";
 
 export async function POST(req) {
   try {
-    const { kind, tier, name, description } = await req.json();
+    const { kind, tier, name, description, archetype } = await req.json();
     const safeTier = ["normal", "legend", "myth"].includes(tier) ? tier : "normal";
+    const archetypeLine = archetype?.trim()
+      ? `Archetype seed — build the character around this concept, weaving it into the Relics universe (don't just restate it verbatim): ${archetype.trim()}`
+      : null;
 
     if (kind === "name") {
       const system = buildNamePrompt();
       const user = [
         `Tier: ${safeTier}`,
+        archetypeLine,
         description?.trim()
           ? `Existing character description for context:\n${description.trim()}`
           : `No description given yet — invent freely within the universe.`,
-      ].join("\n");
+      ]
+        .filter(Boolean)
+        .join("\n");
 
       const raw = await callChat(
         [
@@ -33,11 +39,17 @@ export async function POST(req) {
       const draft = description?.trim();
       const user = [
         `Tier: ${safeTier}`,
+        // Only inject the archetype seed when inventing fresh — an
+        // existing draft should be improved on its own terms, not pulled
+        // toward an unrelated random concept.
+        !draft ? archetypeLine : null,
         name?.trim() ? `Character name: ${name.trim()}` : `No name given yet — invent freely within the universe.`,
         draft
           ? `The user already wrote this draft description — rewrite and improve it per your instructions:\n${draft}`
           : `No draft provided — invent a new character concept freely.`,
-      ].join("\n");
+      ]
+        .filter(Boolean)
+        .join("\n");
 
       const raw = await callChat(
         [

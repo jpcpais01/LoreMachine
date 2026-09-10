@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import TierToggle from "@/components/TierToggle";
 import TierBadge from "@/components/TierBadge";
 import ImageGrid from "@/components/ImageGrid";
 import Highlighted from "@/components/Highlighted";
 import { addCharacter } from "@/lib/db";
+import { randomArchetype } from "@/lib/archetypes";
 
 export default function Home() {
   const [name, setName] = useState("");
@@ -21,6 +22,15 @@ export default function Home() {
   const [saved, setSaved] = useState(false);
   const [nameLoading, setNameLoading] = useState(false);
   const [descLoading, setDescLoading] = useState(false);
+
+  // A ref (not state) so two auto-generate clicks fired back-to-back both
+  // see the same picked archetype instead of racing on an async state update.
+  const archetypeRef = useRef(null);
+
+  function seedArchetype() {
+    if (!archetypeRef.current) archetypeRef.current = randomArchetype();
+    return archetypeRef.current;
+  }
 
   async function handleGenerate(e) {
     e.preventDefault();
@@ -37,6 +47,7 @@ export default function Home() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Generation failed.");
       setResult(data);
+      archetypeRef.current = null;
     } catch (err) {
       setError(err.message);
     } finally {
@@ -48,10 +59,11 @@ export default function Home() {
     setNameLoading(true);
     setError("");
     try {
+      const archetype = seedArchetype();
       const res = await fetch("/api/idea", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kind: "name", tier, description }),
+        body: JSON.stringify({ kind: "name", tier, description, archetype }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to generate a name.");
@@ -67,10 +79,11 @@ export default function Home() {
     setDescLoading(true);
     setError("");
     try {
+      const archetype = seedArchetype();
       const res = await fetch("/api/idea", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kind: "description", tier, name, description }),
+        body: JSON.stringify({ kind: "description", tier, name, description, archetype }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to generate a description.");
