@@ -28,7 +28,15 @@ export default function Home() {
   const archetypeRef = useRef(null);
 
   function seedArchetype() {
-    if (!archetypeRef.current) archetypeRef.current = randomArchetype();
+    // Both fields blank means this is a fresh character (including after
+    // the user manually clears a previous draft) — always re-roll then.
+    // Otherwise reuse whatever was already picked so the name and
+    // description auto-generate buttons agree on the same archetype.
+    if (!name.trim() && !description.trim()) {
+      archetypeRef.current = randomArchetype();
+    } else if (!archetypeRef.current) {
+      archetypeRef.current = randomArchetype();
+    }
     return archetypeRef.current;
   }
 
@@ -47,7 +55,6 @@ export default function Home() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Generation failed.");
       setResult(data);
-      archetypeRef.current = null;
     } catch (err) {
       setError(err.message);
     } finally {
