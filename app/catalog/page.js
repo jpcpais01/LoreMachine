@@ -83,17 +83,25 @@ function CatalogPageCard({ character, onDelete }) {
     const el = pageRef.current;
     if (!el || saving) return;
     setSaving(true);
-    const prevTransform = el.style.transform;
-    el.style.transform = "none";
     try {
       const html2canvas = (await import("html2canvas")).default;
-      const canvas = await html2canvas(el, { scale: 2, backgroundColor: "#ffffff" });
+      // Render an offscreen clone instead of mutating the live element, so
+      // the visible page never reflows/flashes during capture.
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        onclone: (clonedDoc, clonedEl) => {
+          clonedEl.style.transform = "none";
+          clonedDoc.querySelectorAll(".no-print").forEach((node) => {
+            node.style.display = "none";
+          });
+        },
+      });
       const link = document.createElement("a");
       link.href = canvas.toDataURL("image/png");
       link.download = `${(name || "relic").replace(/\s+/g, "-").toLowerCase()}-page.png`;
       link.click();
     } finally {
-      el.style.transform = prevTransform;
       setSaving(false);
     }
   }
