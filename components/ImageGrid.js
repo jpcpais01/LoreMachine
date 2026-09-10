@@ -10,7 +10,16 @@
 function ImageTile({ img, idx, onDownload, className }) {
   return (
     <div className={`relative overflow-hidden ${className}`}>
-      <img src={img.dataUrl} alt={`variation ${idx + 1}`} className="h-full w-full object-cover" />
+      {/* A background-image (not an <img> with object-fit) because
+          html2canvas doesn't respect object-fit and stretches/squeezes the
+          image to fill the box instead of cropping it — background-size
+          renders correctly both on screen and in exported PNGs. */}
+      <div
+        role="img"
+        aria-label={`variation ${idx + 1}`}
+        className="h-full w-full bg-cover bg-center"
+        style={{ backgroundImage: `url(${img.dataUrl})` }}
+      />
       {onDownload && (
         <button
           onClick={() => onDownload(idx)}

@@ -8,7 +8,7 @@ export const PAGE_W = 793.7;
 export const PAGE_H = 1122.5;
 
 const PADDING_PX = 12 * (96 / 25.4); // "12mm"
-const HEADER_HEIGHT = 70; // fixed so the image area's position never depends on name/subtitle length
+const HEADER_HEIGHT = 96; // fixed so the image area's position never depends on name/subtitle length
 const HEADER_GAP = 12;
 const HALF_MARGIN = 20; // keep the image area at least this far above the page's true midline
 const LORE_GAP = 16;
