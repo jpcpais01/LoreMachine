@@ -1,9 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import TierBadge from "@/components/TierBadge";
+import ImageGrid from "@/components/ImageGrid";
+import Highlighted from "@/components/Highlighted";
 import { getAllCharacters, deleteCharacter } from "@/lib/db";
+
+// A4 at 96 CSS px/inch.
+const PAGE_W = 793.7;
+const PAGE_H = 1122.5;
 
 export default function CatalogPage() {
   const [characters, setCharacters] = useState([]);
@@ -42,7 +48,7 @@ export default function CatalogPage() {
         </p>
       )}
 
-      <div className="mt-8 flex flex-col items-center gap-8">
+      <div className="catalog-list mt-8 flex flex-col items-center gap-8">
         {characters.map((c) => (
           <CatalogPageCard key={c.id} character={c} onDelete={() => handleDelete(c.id)} />
         ))}
@@ -51,35 +57,94 @@ export default function CatalogPage() {
   );
 }
 
+function useResponsiveScale() {
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    function update() {
+      const available = Math.min(window.innerWidth - 32, PAGE_W);
+      setScale(Math.max(0.1, available / PAGE_W));
+    }
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
+  return scale;
+}
+
 function CatalogPageCard({ character, onDelete }) {
   const { name, subtitle, tier, lore, images } = character;
-  const cols = images.length === 1 ? "grid-cols-1" : images.length === 2 ? "grid-cols-2" : "grid-cols-3";
+  const scale = useResponsiveScale();
+  const pageRef = useRef(null);
+  const [saving, setSaving] = useState(false);
+
+  async function handleSavePng() {
+    const el = pageRef.current;
+    if (!el || saving) return;
+    setSaving(true);
+    const prevTransform = el.style.transform;
+    el.style.transform = "none";
+    try {
+      const html2canvas = (await import("html2canvas")).default;
+      const canvas = await html2canvas(el, { scale: 2, backgroundColor: "#ffffff" });
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = `${(name || "relic").replace(/\s+/g, "-").toLowerCase()}-page.png`;
+      link.click();
+    } finally {
+      el.style.transform = prevTransform;
+      setSaving(false);
+    }
+  }
 
   return (
-    <div className="catalog-page relative flex flex-col bg-white text-neutral-900 shadow-lg" style={{ width: "210mm", height: "297mm", padding: "12mm" }}>
-      <button
-        onClick={onDelete}
-        className="no-print absolute right-3 top-3 rounded border border-neutral-300 bg-white px-2 py-1 text-xs text-neutral-500 hover:border-red-400 hover:text-red-500"
+    <div className="catalog-page-wrapper mx-auto" style={{ width: PAGE_W * scale, height: PAGE_H * scale }}>
+      <div
+        ref={pageRef}
+        className="catalog-page relative flex flex-col bg-white text-neutral-900 shadow-lg"
+        style={{
+          width: PAGE_W,
+          height: PAGE_H,
+          padding: "12mm",
+          boxSizing: "border-box",
+          transform: `scale(${scale})`,
+          transformOrigin: "top left",
+        }}
       >
-        Remove
-      </button>
-
-      <div className="mb-3 flex items-baseline justify-between border-b border-neutral-300 pb-2">
-        <div>
-          <h2 className="font-display text-3xl">{name}</h2>
-          <p className="italic text-neutral-600">{subtitle}</p>
+        <div className="no-print absolute right-3 top-3 flex gap-2">
+          <button
+            onClick={handleSavePng}
+            disabled={saving}
+            className="rounded border border-neutral-300 bg-white px-2 py-1 text-xs text-neutral-500 hover:border-amber-500 hover:text-amber-600 disabled:opacity-50"
+          >
+            {saving ? "Saving…" : "Save PNG"}
+          </button>
+          <button
+            onClick={onDelete}
+            className="rounded border border-neutral-300 bg-white px-2 py-1 text-xs text-neutral-500 hover:border-red-400 hover:text-red-500"
+          >
+            Remove
+          </button>
         </div>
-        <TierBadge tier={tier} />
-      </div>
 
-      <div className={`grid gap-3 ${cols}`} style={{ height: "55%" }}>
-        {images.map((img, idx) => (
-          <img key={idx} src={img.dataUrl} alt={`${name} ${idx + 1}`} className="h-full w-full rounded object-cover" />
-        ))}
-      </div>
+        <div className="mb-3 flex items-baseline justify-between border-b border-neutral-300 pb-2">
+          <div>
+            <h2 className="font-display text-3xl">{name}</h2>
+            <p className="italic text-neutral-600">
+              <Highlighted text={subtitle} highlightClassName="text-amber-700 font-display font-semibold" />
+            </p>
+          </div>
+          <TierBadge tier={tier} />
+        </div>
 
-      <div className="mt-4 flex-1 overflow-hidden">
-        <p className="whitespace-pre-wrap text-[10pt] leading-relaxed text-neutral-800">{lore}</p>
+        <ImageGrid images={images} className="shrink-0" />
+
+        <div className="mt-4 flex-1 overflow-hidden">
+          <p className="whitespace-pre-wrap text-[10pt] leading-relaxed text-neutral-800">
+            <Highlighted text={lore} highlightClassName="text-amber-700 font-display font-semibold" />
+          </p>
+        </div>
       </div>
     </div>
   );

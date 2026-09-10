@@ -1,0 +1,13 @@
+{
+  "name": "Relics Generator",
+  "short_name": "Relics",
+  "description": "Lore & image machine for the Relics TCG",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#100e16",
+  "theme_color": "#100e16",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

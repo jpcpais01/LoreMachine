@@ -52,13 +52,25 @@ export async function POST(req) {
       throw new Error("The lore model did not return any image prompts.");
     }
 
-    const images = await Promise.all(
-      imagePrompts.map(async (prompt) => {
-        const finalPrompt = buildImagePrompt(prompt, safeTier);
-        const dataUrl = await generateImage(finalPrompt, { aspectRatio: "3:4" });
-        return { prompt, dataUrl };
-      })
-    );
+    // Generate the first image alone, then use it as a visual reference for
+    // the rest so the character stays consistent across variations.
+    const [firstPrompt, ...restPrompts] = imagePrompts;
+    const firstDataUrl = await generateImage(buildImagePrompt(firstPrompt, safeTier), { aspectRatio: "3:4" });
+    const images = [{ prompt: firstPrompt, dataUrl: firstDataUrl }];
+
+    if (restPrompts.length > 0) {
+      const rest = await Promise.all(
+        restPrompts.map(async (prompt) => {
+          const finalPrompt = buildImagePrompt(prompt, safeTier);
+          const dataUrl = await generateImage(finalPrompt, {
+            aspectRatio: "3:4",
+            referenceImages: [firstDataUrl],
+          });
+          return { prompt, dataUrl };
+        })
+      );
+      images.push(...rest);
+    }
 
     return NextResponse.json({
       name: name?.trim() || "",

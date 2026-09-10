@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import TierToggle from "@/components/TierToggle";
 import TierBadge from "@/components/TierBadge";
+import ImageGrid from "@/components/ImageGrid";
+import Highlighted from "@/components/Highlighted";
 import { addCharacter } from "@/lib/db";
 
 export default function Home() {
@@ -140,24 +142,17 @@ export default function Home() {
           <div className="mb-4 flex items-center justify-between">
             <div>
               <h2 className="font-display text-2xl">{name || "(unnamed)"}</h2>
-              <p className="italic text-neutral-400">{result.subtitle}</p>
+              <p className="italic text-neutral-400">
+                <Highlighted text={result.subtitle} />
+              </p>
             </div>
             <TierBadge tier={result.tier} />
           </div>
 
-          <div className={`grid gap-4 ${result.images.length === 1 ? "grid-cols-1" : result.images.length === 2 ? "grid-cols-2" : "grid-cols-3"}`}>
-            {result.images.map((img, idx) => (
-              <div key={idx} className="space-y-2">
-                <img src={img.dataUrl} alt={`${name} variation ${idx + 1}`} className="aspect-[3/4] w-full rounded-lg object-cover" />
-                <button
-                  onClick={() => handleDownload(img.dataUrl, idx)}
-                  className="w-full rounded-md border border-neutral-700 py-1 text-xs text-neutral-300 hover:border-amber-500 hover:text-amber-400"
-                >
-                  Download
-                </button>
-              </div>
-            ))}
-          </div>
+          <ImageGrid
+            images={result.images}
+            onDownload={(idx) => handleDownload(result.images[idx].dataUrl, idx)}
+          />
 
           <div className="mt-5">
             <div className="mb-1 flex items-center justify-between">
@@ -167,7 +162,7 @@ export default function Home() {
               </button>
             </div>
             <p className="whitespace-pre-wrap rounded-lg border border-neutral-800 bg-neutral-950 p-4 text-sm leading-relaxed text-neutral-200">
-              {result.lore}
+              <Highlighted text={result.lore} />
             </p>
           </div>
 
