@@ -9,7 +9,7 @@
 
 function ImageTile({ img, idx, onDownload, className }) {
   return (
-    <div className={`relative overflow-hidden rounded-lg ${className}`}>
+    <div className={`relative overflow-hidden ${className}`}>
       <img src={img.dataUrl} alt={`variation ${idx + 1}`} className="h-full w-full object-cover" />
       {onDownload && (
         <button
