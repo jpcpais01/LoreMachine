@@ -5,7 +5,7 @@ import { parseLlmJson } from "@/lib/parseLlmJson";
 
 export async function POST(req) {
   try {
-    const { kind, tier, name, description, archetype } = await req.json();
+    const { kind, tier, name, description, archetype, startLetter, endLetter } = await req.json();
     const safeTier = ["normal", "legend", "myth"].includes(tier) ? tier : "normal";
     const archetypeLine = archetype?.trim()
       ? `Archetype seed — build the character around this concept, weaving it into the Relics universe (don't just restate it verbatim): ${archetype.trim()}`
@@ -13,9 +13,14 @@ export async function POST(req) {
 
     if (kind === "name") {
       const system = buildNamePrompt();
+      const letterLine =
+        startLetter && endLetter
+          ? `Required constraint: the character's first name must start with the letter "${startLetter.toUpperCase()}" and end with the letter "${endLetter.toUpperCase()}" (case-insensitive). This is a hard requirement — satisfy both exactly.`
+          : null;
       const user = [
         `Tier: ${safeTier}`,
         archetypeLine,
+        letterLine,
         description?.trim()
           ? `Existing character description for context:\n${description.trim()}`
           : `No description given yet — invent freely within the universe.`,

@@ -15,7 +15,7 @@ export default function Home() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [tier, setTier] = useState("normal");
-  const [count, setCount] = useState(3);
+  const [count, setCount] = useState(2);
   const [language, setLanguage] = useState("en");
 
   const [loading, setLoading] = useState(false);
@@ -30,21 +30,31 @@ export default function Home() {
   // (same page layout as the catalog) without saving to the catalog first.
   const hiddenPageRef = useRef(null);
 
-  // A ref (not state) so two auto-generate clicks fired back-to-back both
-  // see the same picked archetype instead of racing on an async state update.
+  // Refs (not state) so two auto-generate clicks fired back-to-back both
+  // see the same picked values instead of racing on an async state update.
   const archetypeRef = useRef(null);
+  const startLetterRef = useRef(null);
+  const endLetterRef = useRef(null);
 
-  function seedArchetype() {
+  function randomLetter() {
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    return letters[Math.floor(Math.random() * letters.length)];
+  }
+
+  function seedConcept() {
     // Both fields blank means this is a fresh character (including after
     // the user manually clears a previous draft) — always re-roll then.
     // Otherwise reuse whatever was already picked so the name and
-    // description auto-generate buttons agree on the same archetype.
-    if (!name.trim() && !description.trim()) {
-      archetypeRef.current = randomArchetype();
-    } else if (!archetypeRef.current) {
-      archetypeRef.current = randomArchetype();
-    }
-    return archetypeRef.current;
+    // description auto-generate buttons agree on the same seed.
+    const fresh = !name.trim() && !description.trim();
+    if (fresh || !archetypeRef.current) archetypeRef.current = randomArchetype();
+    if (fresh || !startLetterRef.current) startLetterRef.current = randomLetter();
+    if (fresh || !endLetterRef.current) endLetterRef.current = randomLetter();
+    return {
+      archetype: archetypeRef.current,
+      startLetter: startLetterRef.current,
+      endLetter: endLetterRef.current,
+    };
   }
 
   async function handleGenerate(e) {
@@ -73,11 +83,11 @@ export default function Home() {
     setNameLoading(true);
     setError("");
     try {
-      const archetype = seedArchetype();
+      const { archetype, startLetter, endLetter } = seedConcept();
       const res = await fetch("/api/idea", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kind: "name", tier, description, archetype }),
+        body: JSON.stringify({ kind: "name", tier, description, archetype, startLetter, endLetter }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to generate a name.");
@@ -93,7 +103,7 @@ export default function Home() {
     setDescLoading(true);
     setError("");
     try {
-      const archetype = seedArchetype();
+      const { archetype } = seedConcept();
       const res = await fetch("/api/idea", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
