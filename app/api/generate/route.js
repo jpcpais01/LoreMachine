@@ -58,7 +58,7 @@ export async function POST(req) {
     if (restPrompts.length > 0) {
       const rest = await Promise.all(
         restPrompts.map(async (prompt) => {
-          const finalPrompt = buildImagePrompt(prompt, safeTier);
+          const finalPrompt = buildImagePrompt(prompt, safeTier, { usesReference: true });
           const dataUrl = await generateImage(finalPrompt, {
             aspectRatio: "3:4",
             referenceImages: [firstDataUrl],
