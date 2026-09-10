@@ -30,9 +30,13 @@ export async function POST(req) {
 
     if (kind === "description") {
       const system = buildDescriptionPrompt();
+      const draft = description?.trim();
       const user = [
         `Tier: ${safeTier}`,
         name?.trim() ? `Character name: ${name.trim()}` : `No name given yet — invent freely within the universe.`,
+        draft
+          ? `The user already wrote this draft description — rewrite and improve it per your instructions:\n${draft}`
+          : `No draft provided — invent a new character concept freely.`,
       ].join("\n");
 
       const raw = await callChat(

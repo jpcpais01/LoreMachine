@@ -70,7 +70,7 @@ export default function Home() {
       const res = await fetch("/api/idea", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kind: "description", tier, name }),
+        body: JSON.stringify({ kind: "description", tier, name, description }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to generate a description.");
@@ -149,7 +149,13 @@ export default function Home() {
               disabled={descLoading}
               className="text-xs text-amber-400 underline underline-offset-2 disabled:opacity-50"
             >
-              {descLoading ? "Thinking…" : "✨ Auto-generate"}
+              {descLoading
+                ? description.trim()
+                  ? "Improving…"
+                  : "Thinking…"
+                : description.trim()
+                ? "✨ Improve"
+                : "✨ Auto-generate"}
             </button>
           </div>
           <textarea

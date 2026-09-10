@@ -146,7 +146,9 @@ function CatalogPageCard({ character, onDelete }) {
           <TierBadge tier={tier} />
         </div>
 
-        <ImageGrid images={images} className="shrink-0" />
+        <div className="shrink-0" style={{ height: "50%" }}>
+          <ImageGrid images={images} fillHeight />
+        </div>
 
         <div className="mt-4 flex-1 overflow-hidden">
           <p className="whitespace-pre-wrap text-[10pt] leading-relaxed text-neutral-800">
