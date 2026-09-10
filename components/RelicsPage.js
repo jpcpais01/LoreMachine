@@ -58,7 +58,7 @@ const RelicsPage = forwardRef(function RelicsPage({ character, scale = 1, button
             <Highlighted text={subtitle} highlightClassName="text-amber-700 font-display font-semibold" />
           </p>
         </div>
-        <TierBadge tier={tier} />
+        <TierBadge tier={tier} onLight />
       </div>
 
       {/* An absolutely positioned child's top:0 aligns with the parent's

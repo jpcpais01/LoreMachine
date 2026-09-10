@@ -1,16 +1,21 @@
 const TIER_STYLES = {
-  normal: "bg-slate-200 text-slate-800 border-slate-400",
-  legend: "bg-violet-200 text-violet-900 border-violet-500",
-  myth: "bg-amber-200 text-amber-900 border-amber-500",
+  dark: {
+    normal: "text-slate-300",
+    legend: "text-violet-400",
+    myth: "text-amber-400",
+  },
+  light: {
+    normal: "text-slate-600",
+    legend: "text-violet-700",
+    myth: "text-amber-700",
+  },
 };
 
-export default function TierBadge({ tier }) {
+export default function TierBadge({ tier, onLight = false }) {
+  const styles = onLight ? TIER_STYLES.light : TIER_STYLES.dark;
+
   return (
-    <span
-      className={`inline-block rounded-full border px-3 py-0.5 text-xs font-semibold uppercase tracking-wider ${
-        TIER_STYLES[tier] || TIER_STYLES.normal
-      }`}
-    >
+    <span className={`font-display text-sm font-semibold uppercase tracking-wider ${styles[tier] || styles.normal}`}>
       {tier}
     </span>
   );
