@@ -143,14 +143,25 @@ export default function Home() {
         <div>
           <div className="mb-1 flex items-center justify-between">
             <label className="text-sm text-neutral-400">Character name</label>
-            <button
-              type="button"
-              onClick={handleAutoName}
-              disabled={nameLoading}
-              className="text-xs text-amber-400 underline underline-offset-2 disabled:opacity-50"
-            >
-              {nameLoading ? "Thinking…" : "✨ Auto-generate"}
-            </button>
+            <div className="flex items-center gap-3">
+              {name && (
+                <button
+                  type="button"
+                  onClick={() => setName("")}
+                  className="text-xs text-neutral-500 underline underline-offset-2 hover:text-neutral-300"
+                >
+                  Clear
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={handleAutoName}
+                disabled={nameLoading}
+                className="text-xs text-amber-400 underline underline-offset-2 disabled:opacity-50"
+              >
+                {nameLoading ? "Thinking…" : "✨ Auto-generate"}
+              </button>
+            </div>
           </div>
           <input
             value={name}
@@ -163,21 +174,32 @@ export default function Home() {
         <div>
           <div className="mb-1 flex items-center justify-between">
             <label className="text-sm text-neutral-400">Describe the character</label>
-            <button
-              type="button"
-              onClick={handleAutoDescription}
-              disabled={descLoading || !name.trim()}
-              title={!name.trim() ? "Enter or auto-generate a name first" : undefined}
-              className="text-xs text-amber-400 underline underline-offset-2 disabled:opacity-50 disabled:no-underline"
-            >
-              {descLoading
-                ? description.trim()
-                  ? "Improving…"
-                  : "Thinking…"
-                : description.trim()
-                ? "✨ Improve"
-                : "✨ Auto-generate"}
-            </button>
+            <div className="flex items-center gap-3">
+              {description && (
+                <button
+                  type="button"
+                  onClick={() => setDescription("")}
+                  className="text-xs text-neutral-500 underline underline-offset-2 hover:text-neutral-300"
+                >
+                  Clear
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={handleAutoDescription}
+                disabled={descLoading || !name.trim()}
+                title={!name.trim() ? "Enter or auto-generate a name first" : undefined}
+                className="text-xs text-amber-400 underline underline-offset-2 disabled:opacity-50 disabled:no-underline"
+              >
+                {descLoading
+                  ? description.trim()
+                    ? "Improving…"
+                    : "Thinking…"
+                  : description.trim()
+                  ? "✨ Improve"
+                  : "✨ Auto-generate"}
+              </button>
+            </div>
           </div>
           <textarea
             value={description}
